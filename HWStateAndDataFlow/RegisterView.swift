@@ -9,16 +9,23 @@ import SwiftUI
 
 struct RegisterView: View {
     @State private var name = ""
+    @State private var get = ""
     @EnvironmentObject var user: UserManager
     
     var body: some View {
         VStack {
-            TextField("Enter your name", text: $name)
-                .multilineTextAlignment(.center)
+            Text("Previous name: \(get)")
             
-            Text("Entered \(name.count) characters")
-                .foregroundColor(changeColor())
-                .padding()
+            HStack {
+                TextField("Enter your name", text: $name)
+                    .multilineTextAlignment(.center)
+                
+                Text("\(name.count)")
+                    .foregroundColor(changeColor())
+                    .padding()
+            }
+            
+            
             
             Button(action: registerUser, label: {
                 HStack {
@@ -28,6 +35,10 @@ struct RegisterView: View {
                
             }).disabled(name.count < 3)
         }
+        .onAppear {
+            guard let gotName = UserDefaults.standard.value(forKey: "Name") else { return }
+            self.get = gotName as! String
+        }
     }
 }
 
@@ -35,6 +46,8 @@ extension RegisterView {
     func registerUser() {
         if !name.isEmpty {
             user.name = name
+            UserDefaults.standard.set(self.name, forKey: "Name")
+            self.get = name
             user.isRegistered = true
         }
     }
